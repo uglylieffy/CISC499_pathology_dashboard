@@ -4,9 +4,17 @@ import numpy as np
 import random
 import matplotlib.cm as cm
 import seaborn
-df = pd.DataFrame({
-    'length': [1.5, 0.5, 1.2, 0.9, 3],
-    'width': [0.7, 0.2, 0.15, 0.2, 1.1]
-    }, index=['pig', 'rabbit', 'duck', 'chicken', 'horse'])
-hist = df.hist(bins=3)
-plt.show()
+
+   
+# data = {'year': [1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010],
+#         'unemployment_rate': [9.8, 12, 8, 7.2, 6.9, 7, 6.5, 6.2, 5.5, 6.3]
+#        }
+  
+# df = pd.DataFrame(data)
+  
+# plt.plot(df['year'], df['unemployment_rate'], color='red', marker='o')
+# plt.title('unemployment rate vs year', fontsize=14)
+# plt.xlabel('year', fontsize=14)
+# plt.ylabel('unemployment rate', fontsize=14)
+# plt.grid(True)
+# plt.show()

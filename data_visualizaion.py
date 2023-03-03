@@ -4,6 +4,7 @@ import numpy as np
 import random
 import matplotlib.cm as cm
 import seaborn
+import math
 
 
 def data_generator(num):
@@ -145,26 +146,23 @@ def data_generator(num):
 # # turn to csv file 
 # fake_data.to_csv('fake_data.csv', index=False)
     
-def split_df(path):
+def split_df(path, header):
     # # import data 
     patient_df = pd.read_csv(path)    
     # clean data to be desired format 
-    temp_df = patient_df['Size of Largest Metastatic Deposit in Millimeters (mm)'].copy()
+    temp_df = patient_df[header].copy()
     for j in temp_df.index:
         val = temp_df[j]
         if ' - ' in val:
             temp_df[j] = str(val).split(' - ')[-1]
-    temp_df.to_csv('temp.csv', index=False)
+    temp_df.to_csv('temp3.csv', index=False)
 
+
+# bar Chart generator ? data preparation 
 def prep_singular_data(path, header):
     hist_df = pd.read_csv(path, header=0)    
 
-    # # with pd.option_context('display.max_rows', None, 'display.max_columns', None)
-    # #     print(hist_df)
-
     label = []
-    header = 'Size of Largest Metastatic Deposit in Millimeters (mm)'
-
     # group df vales into 4 groups, 0-5, 5-10, 10-15, not determined 
     for i in hist_df.index:
         val = hist_df.loc[i,header]
@@ -185,37 +183,111 @@ def prep_singular_data(path, header):
 
 header1 = 'Size of Largest Metastatic Deposit in Millimeters (mm)'
 test_df = prep_singular_data('temp.csv', header1)
-#calculate sum of points for each team
-df_groups = test_df.groupby(['Label'])[header1]
-print(df_groups[])
-# #create bar plot with custom aesthetics
-# df_groups.plot(kind='bar', title=header1,
-#                ylabel='count', xlabel='size group (mm)', figsize=(10, 6))
-# plt.show()
+# print(test_df)
+header2 = 'Distance of Melanoma in situ from Closest Peripheral Margin in Millimeters (mm)'
+# split_df('fake_data.csv', header2)
+test_df2 = prep_singular_data('temp2.csv', header2)
+# print(test_df2)
+header3 = 'Distance of Melanoma in situ from Deep Margin in Millimeters (mm)'
+# split_df('fake_data.csv', header3)
+test_df3 = prep_singular_data('temp3.csv', header3)
 
+# BAR CAHRT
+def bar_char(test_df):
+    # calculate sum of points for each team
+    unique_val = test_df['Label'].unique()
+    # generate data dict to plot data 
+    data = {}
+    for i in unique_val:
+        if i == 1:
+            data['0-5'] = int(test_df['Label'].value_counts()[i])
+        elif i == 2:
+            data['5-10'] = int(test_df['Label'].value_counts()[i])
+        elif i == 3:
+            data['10-15'] = int(test_df['Label'].value_counts()[i])
+        else:
+            data['not determined'] = int(test_df['Label'].value_counts()[i])
+    # print(data)
 
-# visulization data 
-# single histogram CHART 
-def histogram_chart(df, colName, binNum):
-    ax = df.plot.hist(column=[colName], bins=binNum)
-
-# ax = patient_df.plot.hist(column=['Size of Largest Metastatic Deposit in Millimeters (mm)'], bins=3)
-
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# plt.title("Size of Largest Metastatic Deposit in Millimeters (mm)#")
-# langs = ['0-3', '3-5', 'Above 5']
-# students = [23,17,35]
-# ax.bar(langs,students)
-# plt.show()
+    # create bar plot 
+    names = list(data.keys())
+    counts = list(data.values())
+    fig, ax = plt.subplots()
+    bar_container = ax.bar(names, counts)
+    ax.set(ylabel='num of patients', title=header1)
+    ax.bar_label(bar_container, label_type='center')
+    plt.show()
+bar_char(test_df)
 
 
 # SCATTER PLOT 
-# x = np.array([5,7,8,7,2,17,2,9,4,11,12,9,6])
-# y = np.array([99,86,87,88,111,86,103,87,94,78,77,85,86])
-# # plt.title("Tumor Deposits (Note G)")
-# plt.scatter(x, y)
-# plt.show()
+def scatter_plt(test_df1,test_df2,header):
+    x = test_df1[header1].replace(['Cannot be determined'],-1)
+    y = test_df2[header2].replace(['Cannot be determined'],-1)
+    plt.title(header)
+    plt.xlim([-2,16])
+    plt.ylim([-2,16])
+    plt.xlabel(header1)
+    plt.ylabel(header2)
+    plt.scatter(x, y)
+    plt.show()
+scatter_plt(test_df,test_df2,"Size of Largest Metastatic Deposit v.s. Distance of Melanoma in situ from Closest Peripheral Margin")
+
+# LINE CHART
+def line_char(test_df1,test_df2,test_df3,header):
+    # calculate sum of points for each team
+    unique_val = []
+    df_list = [test_df1,test_df2,test_df3]
+    # print(df_list)
+    unique_val1 = test_df1['Label'].unique()
+    unique_val.append(unique_val1)
+    unique_val2 = test_df2['Label'].unique()
+    unique_val.append(unique_val2)
+    unique_val3 = test_df3['Label'].unique()
+    unique_val.append(unique_val3)
+    # unique_val = unique_val1+unique_val2+unique_val3
+    # print(unique_val[0])
+
+    # generate data dict to plot data 
+    data = {}
+    for k in range(len(unique_val)):
+        for i in unique_val[k]:
+            if k == 0:
+                if i == 1:
+                    data['0-5'] = [int(df_list[k]['Label'].value_counts()[i])]
+                elif i == 2:
+                    data['5-10'] = [int(df_list[k]['Label'].value_counts()[i])]
+                elif i == 3:
+                    data['10-15'] = [int(df_list[k]['Label'].value_counts()[i])]
+                else:
+                    data['not determined'] = [int(df_list[k]['Label'].value_counts()[i])]
+            else:
+                if i == 1:
+                    data['0-5'].append(int(df_list[k]['Label'].value_counts()[i]))
+                elif i == 2:
+                    data['5-10'].append(int(df_list[k]['Label'].value_counts()[i]))
+                elif i == 3:
+                    data['10-15'].append(int(df_list[k]['Label'].value_counts()[i]))
+                else:
+                    data['not determined'].append(int(df_list[k]['Label'].value_counts()[i]))                 
+    # print(data)
+
+    key_list = list(data.keys())    
+    for i in range(len(data[key_list[0]])):
+        temp_list = []
+        for value in data.values():
+            temp_list.append(value[i])
+            # print(temp_list)
+        plt.plot(key_list, temp_list)
+    plt.title(header, fontsize=12)
+    plt.xlabel('result type', fontsize=12)
+    plt.ylabel('number', fontsize=12)
+    plt.grid(True)
+    plt.show()
+
+line_char(test_df,test_df2,test_df3,"Tendency")
+
+
 
 
 # DONUT char 
